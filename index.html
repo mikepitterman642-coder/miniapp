@@ -9,16 +9,17 @@
       :root { --bg:#090d1a; --text:#f6f7ff; --muted:#98a1bf; --card:#151d33cc; --line:#ffffff22; --acc:#63d9ff; --acc2:#9e67ff; }
       * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
       html,body { height:100%; color:var(--text); font-family: Inter, system-ui, sans-serif; background:
-        radial-gradient(120% 70% at 10% 0%, #203f7e77, transparent 55%),
-        radial-gradient(110% 70% at 90% 10%, #6b2edb66, transparent 55%),
+        radial-gradient(130% 75% at 8% -5%, #2652a088, transparent 55%),
+        radial-gradient(120% 80% at 90% 0%, #7a32f388, transparent 58%),
+        radial-gradient(130% 65% at 50% 100%, #104d6766, transparent 60%),
         linear-gradient(160deg, #090d1a, #060910 70%);
       }
       body { overflow:hidden; }
-      .app { max-width:490px; margin:0 auto; min-height:100dvh; position:relative; }
-      .screen { position:absolute; inset:0; padding:18px 14px 110px; overflow:auto; opacity:0; transform:translateY(8px); pointer-events:none; transition:.28s; }
+      .app { max-width:500px; margin:0 auto; min-height:100dvh; position:relative; }
+      .screen { position:absolute; inset:0; padding:16px 14px 114px; overflow:auto; opacity:0; transform:translateY(8px); pointer-events:none; transition:.28s; }
       .screen.active { opacity:1; transform:none; pointer-events:auto; }
       .splash { display:grid; place-items:center; text-align:center; }
-      .splash h1 { font-size:42px; font-weight:900; text-shadow:0 0 24px #73cbff88; }
+      .splash h1 { font-size:40px; font-weight:900; text-shadow:0 0 24px #73cbff88; }
       .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; backdrop-filter: blur(6px); }
       .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
       .pill { border:1px solid #ffffff33; border-radius:999px; padding:6px 10px; font-size:12px; color:#dff4ff; background:linear-gradient(120deg,#48d7ff33,#9a65ff33); }
@@ -30,7 +31,7 @@
       .stat .v{font-size:18px;font-weight:800}
       .reel-wrap { margin-top:12px; border-radius:14px; border:1px solid var(--line); overflow:hidden; background:#090f20; position:relative; }
       .reel-wrap:after { content:""; position:absolute; top:0; bottom:0; left:50%; width:4px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#ffd96f 20%,#ffd96f 80%,transparent); box-shadow:0 0 18px #ffd96f; }
-      .track { display:flex; transition:transform 4.2s cubic-bezier(.12,.96,.18,1); }
+      .track { display:flex; transition:transform 4.5s cubic-bezier(.12,.96,.18,1); }
       .tile { min-width:96px; height:78px; display:grid; place-items:center; font-weight:800; font-size:14px; border-right:1px solid #ffffff1c; }
       .usdt{background:linear-gradient(180deg,#1a5a41,#123828)} .boost{background:linear-gradient(180deg,#53349d,#2f1d5e)} .token{background:linear-gradient(180deg,#2f4f97,#1e3360)} .nothing{background:linear-gradient(180deg,#343743,#232632)}
       .btn { width:100%; border:none; border-radius:14px; padding:14px; font-size:18px; font-weight:900; color:#091222; background:linear-gradient(120deg,#58e7ff,#9b72ff); }
@@ -42,8 +43,8 @@
       .item.pending { border-color:#f0d26b66; }
       .mini { font-size:12px; color:var(--muted); }
       .tiny-btn { border:none; border-radius:8px; padding:6px 10px; font-weight:700; background:#36d9a3; color:#082018; }
-      .nav { position:fixed; left:0; right:0; bottom:0; max-width:490px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:8px 8px calc(env(safe-area-inset-bottom,0) + 10px); background:#090f1fe8; border-top:1px solid var(--line); }
-      .nbtn { border:none; background:transparent; color:var(--muted); border-radius:10px; padding:8px 4px; font-size:11px; display:grid; gap:4px; place-items:center; }
+      .nav { position:fixed; left:0; right:0; bottom:0; max-width:500px; margin:0 auto; display:grid; grid-template-columns:repeat(6,1fr); gap:6px; padding:8px 8px calc(env(safe-area-inset-bottom,0) + 10px); background:#090f1fe8; border-top:1px solid var(--line); }
+      .nbtn { border:none; background:transparent; color:var(--muted); border-radius:10px; padding:8px 2px; font-size:11px; display:grid; gap:4px; place-items:center; }
       .nbtn.active { color:#dbf3ff; background:#4cd7ff22; }
       .lang { display:grid; gap:8px; max-width:330px; margin:40px auto; }
       .lang button{border:none;padding:14px;border-radius:12px;background:#1b2742;color:var(--text);font-weight:800}
@@ -73,21 +74,25 @@
     <script>
       const i18n = {
         ru: {
-          tabs:{spin:"🎰 Крутить", prizes:"🎁 Призы", can:"📦 Что можно выиграть", info:"ℹ️ Инфо"},
+          tabs:{spin:"🎰 Крутить", prizes:"🎁 Призы", can:"📦 Что можно выиграть", deposit:"💳 Депозит", withdraw:"💸 Вывод", profile:"👤 Профиль"},
           title:"🎰 Рулетка Ponzi", won:"Выиграно: Более 5000USDT", start:"🚀 Start", spinning:"🎲 Крутится...",
           hint:"🎁 Призы начисляются автоматически. Boost активируй во вкладке Призы.",
-          noWins:"Пока побед нет. Сделайте первый прокрут!", activate:"Активировать Boost", activated:"✅ Boost активирован", needPool:"⚠️ Откройте пул, чтобы активировать Boost", already:"⚠️ Boost уже активирован", nothing:"😶 Ничего не выйграно", insuff:"❌ Недостаточно баланса. Нужно 3$",
-          info:"💎 Плавная рулетка, призы и история побед. Стоимость одного спина 3$.",
+          noWins:"Пока побед нет. Сделайте первый прокрут!", activate:"Активировать Boost", activated:"✅ Boost активирован", needPool:"⚠️ Откройте пул, чтобы активировать Boost", already:"⚠️ Boost уже активирован", nothing:"😶 Ничего не выйграно", insuff:"❌ Недостаточно баланса. Нужно 3$", loadErr:"⚠️ Не удалось обновить данные",
+          depositInfo:"💳 Депозит выполняется через бота в разделе Профиль → Пополнить.",
+          withdrawInfo:"💸 Вывод выполняется через бота в разделе Профиль → Вывести.",
+          profileInfo:"👤 Ваш профиль и баланс синхронизированы с ботом.",
         },
         en: {
-          tabs:{spin:"🎰 Spin", prizes:"🎁 Prizes", can:"📦 Can win", info:"ℹ️ Info"},
+          tabs:{spin:"🎰 Spin", prizes:"🎁 Prizes", can:"📦 Can win", deposit:"💳 Deposit", withdraw:"💸 Withdraw", profile:"👤 Profile"},
           title:"🎰 Ponzi Roulette", won:"Won: More than 5000USDT", start:"🚀 Start", spinning:"🎲 Spinning...",
           hint:"🎁 Rewards are credited automatically. Activate Boost in Prizes tab.",
-          noWins:"No wins yet. Make your first spin!", activate:"Activate Boost", activated:"✅ Boost activated", needPool:"⚠️ Open a pool to activate Boost", already:"⚠️ Boost already activated", nothing:"😶 Nothing won", insuff:"❌ Insufficient balance. Need $3",
-          info:"💎 Smooth roulette, rewards and personal win history. One spin costs $3.",
+          noWins:"No wins yet. Make your first spin!", activate:"Activate Boost", activated:"✅ Boost activated", needPool:"⚠️ Open a pool to activate Boost", already:"⚠️ Boost already activated", nothing:"😶 Nothing won", insuff:"❌ Insufficient balance. Need $3", loadErr:"⚠️ Failed to refresh data",
+          depositInfo:"💳 Deposit is available in the bot (Profile → Deposit).",
+          withdrawInfo:"💸 Withdraw is available in the bot (Profile → Withdraw).",
+          profileInfo:"👤 Your profile and balance are synced with the bot.",
         }
       };
-      const tabIds = ["spin","prizes","can","info"];
+      const tabIds = ["spin","prizes","can","deposit","withdraw","profile"];
       const state = { lang: localStorage.getItem("miniapp_lang") || null, tab:"spin", userId:0, spinning:false, profile:null };
       const catalog = [
         {t:"usdt",l:"4$"},{t:"usdt",l:"5$"},{t:"usdt",l:"2$"},{t:"usdt",l:"7$"},{t:"usdt",l:"10$"},{t:"usdt",l:"15$"},{t:"usdt",l:"20$"},{t:"usdt",l:"25$"},{t:"usdt",l:"50$"},{t:"usdt",l:"250$"},{t:"usdt",l:"200$"},{t:"usdt",l:"300$"},{t:"usdt",l:"500$"},{t:"usdt",l:"600$"},{t:"usdt",l:"1000$"},
@@ -101,10 +106,26 @@
         balance:document.getElementById("balance"), chance:document.getElementById("chance"), tabContent:document.getElementById("tabContent"), toast:document.getElementById("toast")
       };
 
+      let tickTimer = null;
       const tg = () => window.Telegram?.WebApp;
       const cls = (name) => ["splash","lang","main"].forEach((k)=>el[k].classList.toggle("active", k===name));
       const toast = (m)=>{el.toast.textContent=m;el.toast.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.toast.style.display='none',2600)};
-      const api = (path, method='GET', body=null) => fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null}).then(r=>r.json());
+      const api = async (path, method='GET', body=null) => {
+        const r = await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
+        return r.json();
+      };
+
+      function playTick(){
+        try {
+          const ac = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type='square'; o.frequency.value=980;
+          g.gain.value=0.03;
+          o.connect(g); g.connect(ac.destination);
+          o.start(); o.stop(ac.currentTime + 0.04);
+        } catch (_) {}
+      }
 
       function tileClass(type){ return type==='boost'?'boost':type==='token'?'token':type==='nothing'?'nothing':'usdt'; }
       function tileText(item){ if(item.t==='boost')return '🚀 +3% 24ч'; if(item.t==='token')return '🪙 '+item.l; if(item.t==='nothing')return '😶 0'; return '💵 '+item.l; }
@@ -129,8 +150,12 @@
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.prizes}</div><div class="list mt8">${html}</div>`;
         } else if(state.tab==='can') {
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.can}</div><div class="chips mt8">${catalog.map(c=>`<span class="chip">${tileText(c)}</span>`).join('')}</div>`;
-        } else if(state.tab==='info') {
-          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.info}</div><div class="sub mt8">${d.info}</div>`;
+        } else if(state.tab==='deposit') {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.deposit}</div><div class="sub mt8">${d.depositInfo}</div>`;
+        } else if(state.tab==='withdraw') {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.withdraw}</div><div class="sub mt8">${d.withdrawInfo}</div>`;
+        } else if(state.tab==='profile') {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.profile}</div><div class="sub mt8">${d.profileInfo}</div>`;
         } else {
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.spin}</div><div class="sub mt8">${d.hint}</div>`;
         }
@@ -141,15 +166,20 @@
         el.title.textContent=d.title;
         el.winLabel.textContent=d.won;
         el.spinBtn.textContent=d.start;
-        el.balance.textContent=`💰 ${(state.profile?.balance ?? 0).toFixed(2)}$`;
+        el.balance.textContent=`💰 ${(Number(state.profile?.balance) || 0).toFixed(2)}$`;
         el.chance.textContent=`${state.profile?.win_chance ?? '--'}%`;
         renderNav(); renderTab();
       }
 
       async function refreshProfile(){
         if(!state.userId) return;
-        const data=await api(`/api/profile?user_id=${state.userId}`);
-        if(data.ok){ state.profile=data; renderBase(); }
+        try {
+          const data=await api(`/api/profile?user_id=${state.userId}`);
+          if(data.ok){ state.profile=data; renderBase(); }
+          else toast(i18n[state.lang].loadErr);
+        } catch (_) {
+          toast(i18n[state.lang].loadErr);
+        }
       }
 
       function animateTo(label){
@@ -167,26 +197,36 @@
         state.spinning=true; el.spinBtn.disabled=true; el.result.textContent=d.spinning;
         const fake = catalog[Math.floor(Math.random()*catalog.length)];
         animateTo(fake.l);
-        const res = await api('/api/spin','POST',{user_id:state.userId});
-        if(!res.ok){ toast(d.insuff); state.spinning=false; el.spinBtn.disabled=false; el.result.textContent=d.hint; return; }
-        animateTo(res.prize_label || fake.l);
-        setTimeout(async ()=>{
+        if (tickTimer) clearInterval(tickTimer);
+        tickTimer = setInterval(playTick, 130);
+
+        try {
+          const res = await api('/api/spin','POST',{user_id:state.userId});
+          if(!res.ok){ toast(d.insuff); el.result.textContent=d.hint; return; }
+          animateTo(res.prize_label || fake.l);
+          await new Promise(resolve => setTimeout(resolve, 4300));
           await refreshProfile();
-          if(res.reward==='nothing') el.result.textContent=d.nothing;
-          else el.result.textContent=`🏆 ${res.prize_label}`;
+          el.result.textContent = res.reward==='nothing' ? d.nothing : `🏆 ${res.prize_label}`;
+        } catch (_) {
+          toast(d.loadErr);
+          el.result.textContent=d.hint;
+        } finally {
+          if (tickTimer) clearInterval(tickTimer);
           state.spinning=false; el.spinBtn.disabled=false;
-        }, 4200);
+        }
       }
 
       async function activateBoost(winId){
         const d=i18n[state.lang];
-        const res=await api('/api/activate_boost','POST',{user_id:state.userId, win_id:winId});
-        if(res.status==='ok') toast(d.activated); else if(res.status==='already') toast(d.already); else toast(d.needPool);
-        await refreshProfile();
+        try {
+          const res=await api('/api/activate_boost','POST',{user_id:state.userId, win_id:winId});
+          if(res.status==='ok') toast(d.activated); else if(res.status==='already') toast(d.already); else toast(d.needPool);
+          await refreshProfile();
+        } catch (_) { toast(d.loadErr); }
       }
 
       function bind(){
-        document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{state.lang=b.dataset.lang;localStorage.setItem('miniapp_lang',state.lang);renderBase();cls('main')}));
+        document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{state.lang=b.dataset.lang;localStorage.setItem('miniapp_lang',state.lang);renderBase();cls('main');refreshProfile();}));
         el.nav.addEventListener('click',(e)=>{const b=e.target.closest('[data-tab]');if(!b)return;state.tab=b.dataset.tab;renderBase();});
         el.spinBtn.addEventListener('click',doSpin);
         el.tabContent.addEventListener('click',(e)=>{const b=e.target.closest('[data-activate]');if(!b)return;activateBoost(Number(b.dataset.activate));});
@@ -195,8 +235,12 @@
       function initUser(){
         const app=tg();
         app?.ready(); app?.expand();
-        state.userId = Number(app?.initDataUnsafe?.user?.id || localStorage.getItem('demo_uid') || 100001);
-        if(!localStorage.getItem('demo_uid')) localStorage.setItem('demo_uid', String(state.userId));
+        const uid = Number(app?.initDataUnsafe?.user?.id || new URLSearchParams(location.search).get('user_id') || 0);
+        if (uid > 0) state.userId = uid;
+        else {
+          state.userId = Number(localStorage.getItem('demo_uid') || 100001);
+          localStorage.setItem('demo_uid', String(state.userId));
+        }
       }
 
       async function start(){
@@ -204,13 +248,9 @@
         setTimeout(async()=>{
           if(state.lang){ cls('main'); await refreshProfile(); renderBase(); }
           else cls('lang');
-        }, 1100);
+        }, 1000);
       }
       start();
     </script>
   </body>
 </html>
-
-</html>
-
-
