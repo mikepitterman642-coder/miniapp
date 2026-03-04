@@ -74,25 +74,21 @@
     <script>
       const i18n = {
         ru: {
-          tabs:{spin:"🎰 Крутить", prizes:"🎁 Призы", can:"📦 Что можно выиграть", deposit:"💳 Депозит", withdraw:"💸 Вывод", profile:"👤 Профиль"},
+          tabs:{spin:"🎰 Рулетка", prizes:"🎁 Призы", can:"📦 Что можно выиграть", token:"🪙 Token Ponzi", deposit:"💳 Депозит", withdraw:"💸 Вывод"},
           title:"🎰 Рулетка Ponzi", won:"Выиграно: Более 5000USDT", start:"🚀 Start", spinning:"🎲 Крутится...",
           hint:"🎁 Призы начисляются автоматически. Boost активируй во вкладке Призы.",
           noWins:"Пока побед нет. Сделайте первый прокрут!", activate:"Активировать Boost", activated:"✅ Boost активирован", needPool:"⚠️ Откройте пул, чтобы активировать Boost", already:"⚠️ Boost уже активирован", nothing:"😶 Ничего не выйграно", insuff:"❌ Недостаточно баланса. Нужно 3$", loadErr:"⚠️ Не удалось обновить данные",
-          depositInfo:"💳 Депозит выполняется через бота в разделе Профиль → Пополнить.",
-          withdrawInfo:"💸 Вывод выполняется через бота в разделе Профиль → Вывести.",
-          profileInfo:"👤 Ваш профиль и баланс синхронизированы с ботом.",
+          devInfo:"🚧 В Разработке...",
         },
         en: {
-          tabs:{spin:"🎰 Spin", prizes:"🎁 Prizes", can:"📦 Can win", deposit:"💳 Deposit", withdraw:"💸 Withdraw", profile:"👤 Profile"},
+          tabs:{spin:"🎰 Roulette", prizes:"🎁 Prizes", can:"📦 Can win", token:"🪙 Ponzi Token", deposit:"💳 Deposit", withdraw:"💸 Withdraw"},
           title:"🎰 Ponzi Roulette", won:"Won: More than 5000USDT", start:"🚀 Start", spinning:"🎲 Spinning...",
           hint:"🎁 Rewards are credited automatically. Activate Boost in Prizes tab.",
           noWins:"No wins yet. Make your first spin!", activate:"Activate Boost", activated:"✅ Boost activated", needPool:"⚠️ Open a pool to activate Boost", already:"⚠️ Boost already activated", nothing:"😶 Nothing won", insuff:"❌ Insufficient balance. Need $3", loadErr:"⚠️ Failed to refresh data",
-          depositInfo:"💳 Deposit is available in the bot (Profile → Deposit).",
-          withdrawInfo:"💸 Withdraw is available in the bot (Profile → Withdraw).",
-          profileInfo:"👤 Your profile and balance are synced with the bot.",
+          devInfo:"🚧 In development...",
         }
       };
-      const tabIds = ["spin","prizes","can","deposit","withdraw","profile"];
+      const tabIds = ["spin","prizes","can","token","deposit","withdraw"];
       const state = { lang: localStorage.getItem("miniapp_lang") || null, tab:"spin", userId:0, spinning:false, profile:null };
       const catalog = [
         {t:"usdt",l:"4$"},{t:"usdt",l:"5$"},{t:"usdt",l:"2$"},{t:"usdt",l:"7$"},{t:"usdt",l:"10$"},{t:"usdt",l:"15$"},{t:"usdt",l:"20$"},{t:"usdt",l:"25$"},{t:"usdt",l:"50$"},{t:"usdt",l:"250$"},{t:"usdt",l:"200$"},{t:"usdt",l:"300$"},{t:"usdt",l:"500$"},{t:"usdt",l:"600$"},{t:"usdt",l:"1000$"},
@@ -110,8 +106,9 @@
       const tg = () => window.Telegram?.WebApp;
       const cls = (name) => ["splash","lang","main"].forEach((k)=>el[k].classList.toggle("active", k===name));
       const toast = (m)=>{el.toast.textContent=m;el.toast.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.toast.style.display='none',2600)};
+      const API_BASE = 'https://something-random.trycloudflare.com';
       const api = async (path, method='GET', body=null) => {
-        const r = await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
+        const r = await fetch(`${API_BASE}${path}`,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null});
         return r.json();
       };
 
@@ -150,13 +147,11 @@
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.prizes}</div><div class="list mt8">${html}</div>`;
         } else if(state.tab==='can') {
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.can}</div><div class="chips mt8">${catalog.map(c=>`<span class="chip">${tileText(c)}</span>`).join('')}</div>`;
-        } else if(state.tab==='deposit') {
-          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.deposit}</div><div class="sub mt8">${d.depositInfo}</div>`;
-        } else if(state.tab==='withdraw') {
-          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.withdraw}</div><div class="sub mt8">${d.withdrawInfo}</div>`;
-        } else if(state.tab==='profile') {
-          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.profile}</div><div class="sub mt8">${d.profileInfo}</div>`;
         } else {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs[state.tab]}</div><div class="sub mt8">${d.devInfo}</div>`;
+        }
+
+        if(state.tab==='spin') {
           el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.spin}</div><div class="sub mt8">${d.hint}</div>`;
         }
       }
@@ -167,7 +162,7 @@
         el.winLabel.textContent=d.won;
         el.spinBtn.textContent=d.start;
         el.balance.textContent=`💰 ${(Number(state.profile?.balance) || 0).toFixed(2)}$`;
-        el.chance.textContent=`${state.profile?.win_chance ?? '--'}%`;
+        el.chance.textContent=`90%`;
         renderNav(); renderTab();
       }
 
@@ -194,6 +189,10 @@
       async function doSpin(){
         const d=i18n[state.lang];
         if(state.spinning) return;
+        if(!state.userId){ toast(d.loadErr); return; }
+        if(!state.profile){ await refreshProfile(); }
+        if(!state.profile){ toast(d.loadErr); return; }
+        if((Number(state.profile.balance)||0) < 3){ toast(d.insuff); return; }
         state.spinning=true; el.spinBtn.disabled=true; el.result.textContent=d.spinning;
         const fake = catalog[Math.floor(Math.random()*catalog.length)];
         animateTo(fake.l);
@@ -236,11 +235,7 @@
         const app=tg();
         app?.ready(); app?.expand();
         const uid = Number(app?.initDataUnsafe?.user?.id || new URLSearchParams(location.search).get('user_id') || 0);
-        if (uid > 0) state.userId = uid;
-        else {
-          state.userId = Number(localStorage.getItem('demo_uid') || 100001);
-          localStorage.setItem('demo_uid', String(state.userId));
-        }
+        state.userId = uid > 0 ? uid : 0;
       }
 
       async function start(){
