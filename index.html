@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>Ponzi Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      :root {
+        --bg: #070b16;
+        --surface: #121a2d;
+        --surface-2: #1b2742;
+        --text: #f2f6ff;
+        --muted: #96a4c5;
+        --accent: #3dbbff;
+        --accent-2: #9b5dff;
+        --good: #35d39a;
+        --danger: #ff5978;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+      html, body { width: 100%; height: 100%; background: radial-gradient(circle at top, #182745 0%, var(--bg) 60%); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      body { overflow: hidden; }
+      .app { position: relative; min-height: 100dvh; max-width: 480px; margin: 0 auto; }
+      .screen { position: absolute; inset: 0; padding: 20px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: 0.3s ease; }
+      .screen.active { opacity: 1; transform: none; pointer-events: auto; }
+      .center { display: grid; place-items: center; }
+      .title-xl { font-size: clamp(38px, 10vw, 50px); font-weight: 800; text-shadow: 0 8px 26px rgba(53,122,255,.35); }
+      .lang-card,.main-wrap { width: 100%; }
+      .lang-card { background: rgba(13,18,33,.65); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 18px; }
+      .lang-title { text-align: center; margin-bottom: 14px; }
+      .lang-buttons { display: grid; gap: 10px; }
+      .lang-btn { border: none; border-radius: 12px; padding: 14px; font-weight: 700; font-size: 16px; background: var(--surface-2); color: var(--text); }
+      .main-wrap { padding: 6px 4px 110px; }
+      .beta-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .beta-pill { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #d8ebff; background: linear-gradient(120deg, rgba(61,187,255,.28), rgba(155,93,255,.3)); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 6px 10px; }
+      .balance { font-weight: 700; color: #d0f9ea; }
+      .roulette-card { background: linear-gradient(170deg, rgba(23,34,57,.95), rgba(14,19,34,.95)); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 14px; box-shadow: 0 16px 40px rgba(0,0,0,.25); }
+      .roulette-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      .roulette-title { font-size: 21px; font-weight: 800; }
+      .cost { font-size: 13px; color: var(--muted); }
+      .reel-wrap { border-radius: 14px; background: #0a1020; border: 1px solid rgba(255,255,255,.08); overflow: hidden; position: relative; }
+      .reel-wrap::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; transform: translateX(-50%); background: linear-gradient(180deg, rgba(255,255,255,0), #ffd857 20%, #ffd857 80%, rgba(255,255,255,0)); box-shadow: 0 0 16px #ffd857; }
+      .reel-track { display: flex; transition: transform 3.2s cubic-bezier(.12,.97,.18,1); }
+      .tile { min-width: 88px; height: 72px; display: grid; place-items: center; font-size: 16px; font-weight: 800; border-right: 1px solid rgba(255,255,255,.07); }
+      .tile.usdt { background: linear-gradient(180deg, #194d36, #103021); }
+      .tile.boost { background: linear-gradient(180deg, #5331a7, #281b54); }
+      .roulette-info { margin-top: 12px; color: var(--muted); min-height: 40px; line-height: 1.3; }
+      .start-btn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 14px; font-size: 18px; font-weight: 800; color: #08101e; background: linear-gradient(120deg, #40dbff, #8f67ff); }
+      .start-btn:disabled { opacity: .65; }
+      .tab-card { margin-top: 10px; background: rgba(15,23,40,.85); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px; color: var(--muted); min-height: 106px; }
+      .tab-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+      .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); background: rgba(9,13,24,.95); border-top: 1px solid rgba(255,255,255,.14); padding: 8px 8px calc(env(safe-area-inset-bottom,0px) + 10px); }
+      .nav-btn { border: none; background: transparent; color: var(--muted); border-radius: 10px; font-size: 11px; padding: 7px 2px; display: grid; gap: 4px; place-items: center; }
+      .nav-btn.active { color: #c8e9ff; background: rgba(61,187,255,.15); }
+      .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 96px; max-width: 430px; width: calc(100% - 30px); background: rgba(8,14,26,.95); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #d9f5ff; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <section class="screen active center" id="splash"><h1 class="title-xl">✨ Beta Version</h1></section>
+      <section class="screen center" id="language">
+        <div class="lang-card">
+          <h2 class="lang-title" id="langTitle">Выберите язык / Choose language</h2>
+          <div class="lang-buttons">
+            <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
+            <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+          </div>
+        </div>
+      </section>
+      <section class="screen" id="main">
+        <main class="main-wrap">
+          <div class="beta-line"><span class="beta-pill">🎉 BETA VERSION</span><span class="balance" id="balanceLabel">💰</span></div>
+          <div id="farmArea"></div>
+          <div class="tab-card" id="tabCard"></div>
+        </main>
+        <nav class="bottom-nav" id="bottomNav"></nav>
+      </section>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const I18N = {
+        ru: {
+          chooseLanguage: "Выберите язык / Choose language",
+          tabs: { farm: "🎰 Дом", tge: "🚀 TGE", deposit: "💳 Депозит", withdraw: "💸 Вывод", profile: "👤 Профиль" },
+          tabText: {
+            tge: "🚀 TGE в разработке. Следите за новостями!",
+            deposit: "💳 Пополнение пока через бота. Скоро прямо в WebApp.",
+            withdraw: "💸 Вывод пока через бота. Скоро добавим быстрые действия.",
+            profile: "👤 Здесь скоро будут уровни, ачивки и история прокрутов."
+          },
+          rouletteTitle: "🎰 Рулетка удачи",
+          rouletteCost: "1 прокрут = 3$",
+          rouletteHint: "🎁 Призы: Boost +3% на 12ч или USDT",
+          start: "🚀 Start",
+          spinning: "🎲 Крутим...",
+          sentToBot: "📨 Запрос отправлен боту. Результат и списание придут в чат.",
+          demoOnly: "⚠️ Откройте Mini App из Telegram, чтобы бот проверил баланс.",
+          betaTab: "✨ Главный экран beta-версии"
+        },
+        en: {
+          chooseLanguage: "Выберите язык / Choose language",
+          tabs: { farm: "🎰 Home", tge: "🚀 TGE", deposit: "💳 Deposit", withdraw: "💸 Withdraw", profile: "👤 Profile" },
+          tabText: {
+            tge: "🚀 TGE is in development. Stay tuned!",
+            deposit: "💳 Deposits are currently handled in bot chat.",
+            withdraw: "💸 Withdrawals are currently handled in bot chat.",
+            profile: "👤 Levels, achievements and spin history are coming soon."
+          },
+          rouletteTitle: "🎰 Lucky Roulette",
+          rouletteCost: "1 spin = $3",
+          rouletteHint: "🎁 Rewards: +3% Boost for 12h or USDT",
+          start: "🚀 Start",
+          spinning: "🎲 Spinning...",
+          sentToBot: "📨 Request sent to bot. Balance check + reward will arrive in chat.",
+          demoOnly: "⚠️ Open this Mini App from Telegram so the bot can check your balance.",
+          betaTab: "✨ Main beta screen"
+        }
+      };
+      const TABS = [
+        { id: "farm", icon: "🎰" }, { id: "tge", icon: "🚀" }, { id: "deposit", icon: "💳" }, { id: "withdraw", icon: "💸" }, { id: "profile", icon: "👤" }
+      ];
+      const TILES = ["USDT 2$", "BOOST", "USDT 5$", "USDT 3$", "BOOST", "USDT 8$", "USDT 4$", "BOOST"];
+
+      const state = { lang: localStorage.getItem("miniapp_lang") || null, activeTab: "farm", spinning: false, balance: "--" };
+      const el = {
+        splash: document.getElementById("splash"), language: document.getElementById("language"), main: document.getElementById("main"),
+        langTitle: document.getElementById("langTitle"), farmArea: document.getElementById("farmArea"), tabCard: document.getElementById("tabCard"),
+        bottomNav: document.getElementById("bottomNav"), toast: document.getElementById("toast"), balanceLabel: document.getElementById("balanceLabel")
+      };
+
+      function tg() { return window.Telegram?.WebApp; }
+      function initTelegram() {
+        const app = tg(); if (!app) return;
+        app.ready(); app.expand();
+        const theme = app.themeParams || {};
+        if (theme.bg_color) document.documentElement.style.setProperty("--bg", theme.bg_color);
+        if (theme.text_color) document.documentElement.style.setProperty("--text", theme.text_color);
+      }
+      function showScreen(name) { ["splash", "language", "main"].forEach((k) => el[k].classList.toggle("active", k === name)); }
+      function showToast(msg) {
+        el.toast.textContent = msg; el.toast.style.display = "block";
+        clearTimeout(showToast.t); showToast.t = setTimeout(() => (el.toast.style.display = "none"), 2600);
+      }
+
+      function renderNav() {
+        const d = I18N[state.lang];
+        el.bottomNav.innerHTML = TABS.map((tab) => `<button class="nav-btn ${state.activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}"><span>${tab.icon}</span><span>${d.tabs[tab.id]}</span></button>`).join("");
+      }
+
+      function buildRouletteCard() {
+        const d = I18N[state.lang];
+        const tiles = [...TILES, ...TILES, ...TILES].map((v) => `<div class="tile ${v.includes("BOOST") ? "boost" : "usdt"}">${v.includes("BOOST") ? "🚀 +3%" : "💵 " + v.replace("USDT ", "")}</div>`).join("");
+        return `<section class="roulette-card">
+          <div class="roulette-head"><h3 class="roulette-title">${d.rouletteTitle}</h3><span class="cost">${d.rouletteCost}</span></div>
+          <div class="reel-wrap"><div class="reel-track" id="reelTrack">${tiles}</div></div>
+          <div class="roulette-info" id="rouletteInfo">${d.rouletteHint}</div>
+          <button class="start-btn" id="startBtn">${d.start}</button>
+        </section>`;
+      }
+
+      function renderMain() {
+        const d = I18N[state.lang];
+        el.langTitle.textContent = d.chooseLanguage;
+        renderNav();
+        el.balanceLabel.textContent = `💰 ${state.balance}`;
+
+        if (state.activeTab === "farm") {
+          el.farmArea.innerHTML = buildRouletteCard();
+          el.tabCard.innerHTML = `<div class="tab-title">${d.betaTab}</div><div>${d.rouletteHint}</div>`;
+          bindRoulette();
+        } else {
+          el.farmArea.innerHTML = "";
+          el.tabCard.innerHTML = `<div class="tab-title">${d.tabs[state.activeTab]}</div><div>${d.tabText[state.activeTab]}</div>`;
+        }
+      }
+
+      function animateSpin() {
+        const reel = document.getElementById("reelTrack");
+        const chosen = Math.floor(Math.random() * TILES.length) + TILES.length;
+        reel.style.transform = `translateX(-${chosen * 88 - 176}px)`;
+        return TILES[chosen % TILES.length];
+      }
+
+      function bindRoulette() {
+        const d = I18N[state.lang];
+        const btn = document.getElementById("startBtn");
+        const info = document.getElementById("rouletteInfo");
+        btn?.addEventListener("click", () => {
+          if (state.spinning) return;
+          state.spinning = true;
+          btn.disabled = true;
+          info.textContent = d.spinning;
+          animateSpin();
+
+          const app = tg();
+          if (app) {
+            app.sendData(JSON.stringify({ action: "roulette_spin", ts: Date.now() }));
+            showToast(d.sentToBot);
+          } else {
+            showToast(d.demoOnly);
+          }
+
+          setTimeout(() => {
+            state.spinning = false;
+            btn.disabled = false;
+            info.textContent = d.rouletteHint;
+          }, 3400);
+        });
+      }
+
+      function bindEvents() {
+        document.querySelectorAll("[data-lang]").forEach((button) => button.addEventListener("click", () => {
+          state.lang = button.dataset.lang;
+          localStorage.setItem("miniapp_lang", state.lang);
+          state.activeTab = "farm";
+          renderMain();
+          showScreen("main");
+        }));
+        el.bottomNav.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-tab]");
+          if (!btn) return;
+          state.activeTab = btn.dataset.tab;
+          renderMain();
+        });
+      }
+
+      function initIdentity() {
+        const app = tg();
+        const user = app?.initDataUnsafe?.user;
+        if (user?.id) state.balance = "user#" + user.id;
+      }
+
+      function start() {
+        initTelegram();
+        initIdentity();
+        bindEvents();
+        setTimeout(() => {
+          if (state.lang && I18N[state.lang]) { renderMain(); showScreen("main"); }
+          else showScreen("language");
+        }, 1400);
+      }
+      start();
+    </script>
+  </body>
+</html>
+
