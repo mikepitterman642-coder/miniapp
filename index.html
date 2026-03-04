@@ -3,245 +3,214 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <title>Ponzi Mini App</title>
+    <title>Ponzi Roulette</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-      :root {
-        --bg: #070b16;
-        --surface: #121a2d;
-        --surface-2: #1b2742;
-        --text: #f2f6ff;
-        --muted: #96a4c5;
-        --accent: #3dbbff;
-        --accent-2: #9b5dff;
-        --good: #35d39a;
-        --danger: #ff5978;
+      :root { --bg:#090d1a; --text:#f6f7ff; --muted:#98a1bf; --card:#151d33cc; --line:#ffffff22; --acc:#63d9ff; --acc2:#9e67ff; }
+      * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+      html,body { height:100%; color:var(--text); font-family: Inter, system-ui, sans-serif; background:
+        radial-gradient(120% 70% at 10% 0%, #203f7e77, transparent 55%),
+        radial-gradient(110% 70% at 90% 10%, #6b2edb66, transparent 55%),
+        linear-gradient(160deg, #090d1a, #060910 70%);
       }
-      * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-      html, body { width: 100%; height: 100%; background: radial-gradient(circle at top, #182745 0%, var(--bg) 60%); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      body { overflow: hidden; }
-      .app { position: relative; min-height: 100dvh; max-width: 480px; margin: 0 auto; }
-      .screen { position: absolute; inset: 0; padding: 20px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: 0.3s ease; }
-      .screen.active { opacity: 1; transform: none; pointer-events: auto; }
-      .center { display: grid; place-items: center; }
-      .title-xl { font-size: clamp(38px, 10vw, 50px); font-weight: 800; text-shadow: 0 8px 26px rgba(53,122,255,.35); }
-      .lang-card,.main-wrap { width: 100%; }
-      .lang-card { background: rgba(13,18,33,.65); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 18px; }
-      .lang-title { text-align: center; margin-bottom: 14px; }
-      .lang-buttons { display: grid; gap: 10px; }
-      .lang-btn { border: none; border-radius: 12px; padding: 14px; font-weight: 700; font-size: 16px; background: var(--surface-2); color: var(--text); }
-      .main-wrap { padding: 6px 4px 110px; }
-      .beta-line { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-      .beta-pill { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #d8ebff; background: linear-gradient(120deg, rgba(61,187,255,.28), rgba(155,93,255,.3)); border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 6px 10px; }
-      .balance { font-weight: 700; color: #d0f9ea; }
-      .roulette-card { background: linear-gradient(170deg, rgba(23,34,57,.95), rgba(14,19,34,.95)); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 14px; box-shadow: 0 16px 40px rgba(0,0,0,.25); }
-      .roulette-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-      .roulette-title { font-size: 21px; font-weight: 800; }
-      .cost { font-size: 13px; color: var(--muted); }
-      .reel-wrap { border-radius: 14px; background: #0a1020; border: 1px solid rgba(255,255,255,.08); overflow: hidden; position: relative; }
-      .reel-wrap::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; transform: translateX(-50%); background: linear-gradient(180deg, rgba(255,255,255,0), #ffd857 20%, #ffd857 80%, rgba(255,255,255,0)); box-shadow: 0 0 16px #ffd857; }
-      .reel-track { display: flex; transition: transform 3.2s cubic-bezier(.12,.97,.18,1); }
-      .tile { min-width: 88px; height: 72px; display: grid; place-items: center; font-size: 16px; font-weight: 800; border-right: 1px solid rgba(255,255,255,.07); }
-      .tile.usdt { background: linear-gradient(180deg, #194d36, #103021); }
-      .tile.boost { background: linear-gradient(180deg, #5331a7, #281b54); }
-      .roulette-info { margin-top: 12px; color: var(--muted); min-height: 40px; line-height: 1.3; }
-      .start-btn { margin-top: 10px; width: 100%; border: none; border-radius: 14px; padding: 14px; font-size: 18px; font-weight: 800; color: #08101e; background: linear-gradient(120deg, #40dbff, #8f67ff); }
-      .start-btn:disabled { opacity: .65; }
-      .tab-card { margin-top: 10px; background: rgba(15,23,40,.85); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px; color: var(--muted); min-height: 106px; }
-      .tab-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-      .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); background: rgba(9,13,24,.95); border-top: 1px solid rgba(255,255,255,.14); padding: 8px 8px calc(env(safe-area-inset-bottom,0px) + 10px); }
-      .nav-btn { border: none; background: transparent; color: var(--muted); border-radius: 10px; font-size: 11px; padding: 7px 2px; display: grid; gap: 4px; place-items: center; }
-      .nav-btn.active { color: #c8e9ff; background: rgba(61,187,255,.15); }
-      .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 96px; max-width: 430px; width: calc(100% - 30px); background: rgba(8,14,26,.95); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #d9f5ff; display: none; }
+      body { overflow:hidden; }
+      .app { max-width:490px; margin:0 auto; min-height:100dvh; position:relative; }
+      .screen { position:absolute; inset:0; padding:18px 14px 110px; overflow:auto; opacity:0; transform:translateY(8px); pointer-events:none; transition:.28s; }
+      .screen.active { opacity:1; transform:none; pointer-events:auto; }
+      .splash { display:grid; place-items:center; text-align:center; }
+      .splash h1 { font-size:42px; font-weight:900; text-shadow:0 0 24px #73cbff88; }
+      .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; backdrop-filter: blur(6px); }
+      .row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+      .pill { border:1px solid #ffffff33; border-radius:999px; padding:6px 10px; font-size:12px; color:#dff4ff; background:linear-gradient(120deg,#48d7ff33,#9a65ff33); }
+      .title { font-size:22px; font-weight:900; }
+      .sub { color:var(--muted); font-size:13px; }
+      .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+      .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+      .stat { background:#0e162bcc; border:1px solid var(--line); border-radius:12px; padding:10px; }
+      .stat .v{font-size:18px;font-weight:800}
+      .reel-wrap { margin-top:12px; border-radius:14px; border:1px solid var(--line); overflow:hidden; background:#090f20; position:relative; }
+      .reel-wrap:after { content:""; position:absolute; top:0; bottom:0; left:50%; width:4px; transform:translateX(-50%); background:linear-gradient(180deg,transparent,#ffd96f 20%,#ffd96f 80%,transparent); box-shadow:0 0 18px #ffd96f; }
+      .track { display:flex; transition:transform 4.2s cubic-bezier(.12,.96,.18,1); }
+      .tile { min-width:96px; height:78px; display:grid; place-items:center; font-weight:800; font-size:14px; border-right:1px solid #ffffff1c; }
+      .usdt{background:linear-gradient(180deg,#1a5a41,#123828)} .boost{background:linear-gradient(180deg,#53349d,#2f1d5e)} .token{background:linear-gradient(180deg,#2f4f97,#1e3360)} .nothing{background:linear-gradient(180deg,#343743,#232632)}
+      .btn { width:100%; border:none; border-radius:14px; padding:14px; font-size:18px; font-weight:900; color:#091222; background:linear-gradient(120deg,#58e7ff,#9b72ff); }
+      .btn:disabled { opacity:.6; }
+      .chips { display:flex; flex-wrap:wrap; gap:6px; }
+      .chip { border:1px solid var(--line); border-radius:10px; padding:6px 8px; font-size:12px; background:#0f172b; }
+      .list { display:grid; gap:8px; }
+      .item { border:1px solid var(--line); border-radius:12px; padding:10px; background:#0f162acc; }
+      .item.pending { border-color:#f0d26b66; }
+      .mini { font-size:12px; color:var(--muted); }
+      .tiny-btn { border:none; border-radius:8px; padding:6px 10px; font-weight:700; background:#36d9a3; color:#082018; }
+      .nav { position:fixed; left:0; right:0; bottom:0; max-width:490px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:8px 8px calc(env(safe-area-inset-bottom,0) + 10px); background:#090f1fe8; border-top:1px solid var(--line); }
+      .nbtn { border:none; background:transparent; color:var(--muted); border-radius:10px; padding:8px 4px; font-size:11px; display:grid; gap:4px; place-items:center; }
+      .nbtn.active { color:#dbf3ff; background:#4cd7ff22; }
+      .lang { display:grid; gap:8px; max-width:330px; margin:40px auto; }
+      .lang button{border:none;padding:14px;border-radius:12px;background:#1b2742;color:var(--text);font-weight:800}
+      .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;width:calc(100% - 28px);max-width:430px;background:#0d1528f0;border:1px solid var(--line);border-radius:12px;padding:10px;display:none}
     </style>
   </head>
   <body>
     <div class="app">
-      <section class="screen active center" id="splash"><h1 class="title-xl">✨ Beta Version</h1></section>
-      <section class="screen center" id="language">
-        <div class="lang-card">
-          <h2 class="lang-title" id="langTitle">Выберите язык / Choose language</h2>
-          <div class="lang-buttons">
-            <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
-            <button class="lang-btn" data-lang="en">🇬🇧 English</button>
-          </div>
-        </div>
-      </section>
+      <section class="screen active splash" id="splash"><h1>✨ Beta Version</h1></section>
+      <section class="screen" id="lang"><div class="lang"><button data-lang="ru">🇷🇺 Русский</button><button data-lang="en">🇬🇧 English</button></div></section>
       <section class="screen" id="main">
-        <main class="main-wrap">
-          <div class="beta-line"><span class="beta-pill">🎉 BETA VERSION</span><span class="balance" id="balanceLabel">💰</span></div>
-          <div id="farmArea"></div>
-          <div class="tab-card" id="tabCard"></div>
-        </main>
-        <nav class="bottom-nav" id="bottomNav"></nav>
+        <div class="card">
+          <div class="row"><span class="pill">🎉 BETA ROULETTE</span><span class="pill" id="balance">💰 --</span></div>
+          <div class="title mt8" id="title">🎰 Рулетка Ponzi</div>
+          <div class="sub mt8" id="winLabel">Выиграно: Более 5000USDT</div>
+          <div class="stats mt12"><div class="stat"><div class="mini">💸 Стоимость прокрута</div><div class="v">3$</div></div><div class="stat"><div class="mini">🏆 Шанс победы</div><div class="v" id="chance">--%</div></div></div>
+          <div class="reel-wrap"><div class="track" id="track"></div></div>
+          <div class="sub mt8" id="result">🎁 Крути и забирай призы</div>
+          <button class="btn mt12" id="spinBtn">🚀 Start</button>
+        </div>
+        <div class="card mt12" id="tabContent"></div>
       </section>
+      <nav class="nav" id="nav"></nav>
+      <div class="toast" id="toast"></div>
     </div>
-    <div class="toast" id="toast"></div>
 
     <script>
-      const I18N = {
+      const i18n = {
         ru: {
-          chooseLanguage: "Выберите язык / Choose language",
-          tabs: { farm: "🎰 Дом", tge: "🚀 TGE", deposit: "💳 Депозит", withdraw: "💸 Вывод", profile: "👤 Профиль" },
-          tabText: {
-            tge: "🚀 TGE в разработке. Следите за новостями!",
-            deposit: "💳 Пополнение пока через бота. Скоро прямо в WebApp.",
-            withdraw: "💸 Вывод пока через бота. Скоро добавим быстрые действия.",
-            profile: "👤 Здесь скоро будут уровни, ачивки и история прокрутов."
-          },
-          rouletteTitle: "🎰 Рулетка удачи",
-          rouletteCost: "1 прокрут = 3$",
-          rouletteHint: "🎁 Призы: Boost +3% на 12ч или USDT",
-          start: "🚀 Start",
-          spinning: "🎲 Крутим...",
-          sentToBot: "📨 Запрос отправлен боту. Результат и списание придут в чат.",
-          demoOnly: "⚠️ Откройте Mini App из Telegram, чтобы бот проверил баланс.",
-          betaTab: "✨ Главный экран beta-версии"
+          tabs:{spin:"🎰 Крутить", prizes:"🎁 Призы", can:"📦 Что можно выиграть", info:"ℹ️ Инфо"},
+          title:"🎰 Рулетка Ponzi", won:"Выиграно: Более 5000USDT", start:"🚀 Start", spinning:"🎲 Крутится...",
+          hint:"🎁 Призы начисляются автоматически. Boost активируй во вкладке Призы.",
+          noWins:"Пока побед нет. Сделайте первый прокрут!", activate:"Активировать Boost", activated:"✅ Boost активирован", needPool:"⚠️ Откройте пул, чтобы активировать Boost", already:"⚠️ Boost уже активирован", nothing:"😶 Ничего не выйграно", insuff:"❌ Недостаточно баланса. Нужно 3$",
+          info:"💎 Плавная рулетка, призы и история побед. Стоимость одного спина 3$.",
         },
         en: {
-          chooseLanguage: "Выберите язык / Choose language",
-          tabs: { farm: "🎰 Home", tge: "🚀 TGE", deposit: "💳 Deposit", withdraw: "💸 Withdraw", profile: "👤 Profile" },
-          tabText: {
-            tge: "🚀 TGE is in development. Stay tuned!",
-            deposit: "💳 Deposits are currently handled in bot chat.",
-            withdraw: "💸 Withdrawals are currently handled in bot chat.",
-            profile: "👤 Levels, achievements and spin history are coming soon."
-          },
-          rouletteTitle: "🎰 Lucky Roulette",
-          rouletteCost: "1 spin = $3",
-          rouletteHint: "🎁 Rewards: +3% Boost for 12h or USDT",
-          start: "🚀 Start",
-          spinning: "🎲 Spinning...",
-          sentToBot: "📨 Request sent to bot. Balance check + reward will arrive in chat.",
-          demoOnly: "⚠️ Open this Mini App from Telegram so the bot can check your balance.",
-          betaTab: "✨ Main beta screen"
+          tabs:{spin:"🎰 Spin", prizes:"🎁 Prizes", can:"📦 Can win", info:"ℹ️ Info"},
+          title:"🎰 Ponzi Roulette", won:"Won: More than 5000USDT", start:"🚀 Start", spinning:"🎲 Spinning...",
+          hint:"🎁 Rewards are credited automatically. Activate Boost in Prizes tab.",
+          noWins:"No wins yet. Make your first spin!", activate:"Activate Boost", activated:"✅ Boost activated", needPool:"⚠️ Open a pool to activate Boost", already:"⚠️ Boost already activated", nothing:"😶 Nothing won", insuff:"❌ Insufficient balance. Need $3",
+          info:"💎 Smooth roulette, rewards and personal win history. One spin costs $3.",
         }
       };
-      const TABS = [
-        { id: "farm", icon: "🎰" }, { id: "tge", icon: "🚀" }, { id: "deposit", icon: "💳" }, { id: "withdraw", icon: "💸" }, { id: "profile", icon: "👤" }
+      const tabIds = ["spin","prizes","can","info"];
+      const state = { lang: localStorage.getItem("miniapp_lang") || null, tab:"spin", userId:0, spinning:false, profile:null };
+      const catalog = [
+        {t:"usdt",l:"4$"},{t:"usdt",l:"5$"},{t:"usdt",l:"2$"},{t:"usdt",l:"7$"},{t:"usdt",l:"10$"},{t:"usdt",l:"15$"},{t:"usdt",l:"20$"},{t:"usdt",l:"25$"},{t:"usdt",l:"50$"},{t:"usdt",l:"250$"},{t:"usdt",l:"200$"},{t:"usdt",l:"300$"},{t:"usdt",l:"500$"},{t:"usdt",l:"600$"},{t:"usdt",l:"1000$"},
+        {t:"boost",l:"Буст +3% 24ч"},{t:"nothing",l:"Ничего не выйграно"},{t:"token",l:"10.000 токенов"},{t:"token",l:"15.000 токенов"},{t:"token",l:"5.000 токенов"},
       ];
-      const TILES = ["USDT 2$", "BOOST", "USDT 5$", "USDT 3$", "BOOST", "USDT 8$", "USDT 4$", "BOOST"];
 
-      const state = { lang: localStorage.getItem("miniapp_lang") || null, activeTab: "farm", spinning: false, balance: "--" };
       const el = {
-        splash: document.getElementById("splash"), language: document.getElementById("language"), main: document.getElementById("main"),
-        langTitle: document.getElementById("langTitle"), farmArea: document.getElementById("farmArea"), tabCard: document.getElementById("tabCard"),
-        bottomNav: document.getElementById("bottomNav"), toast: document.getElementById("toast"), balanceLabel: document.getElementById("balanceLabel")
+        splash: document.getElementById("splash"), lang:document.getElementById("lang"), main:document.getElementById("main"),
+        nav:document.getElementById("nav"), title:document.getElementById("title"), winLabel:document.getElementById("winLabel"),
+        track:document.getElementById("track"), result:document.getElementById("result"), spinBtn:document.getElementById("spinBtn"),
+        balance:document.getElementById("balance"), chance:document.getElementById("chance"), tabContent:document.getElementById("tabContent"), toast:document.getElementById("toast")
       };
 
-      function tg() { return window.Telegram?.WebApp; }
-      function initTelegram() {
-        const app = tg(); if (!app) return;
-        app.ready(); app.expand();
-        const theme = app.themeParams || {};
-        if (theme.bg_color) document.documentElement.style.setProperty("--bg", theme.bg_color);
-        if (theme.text_color) document.documentElement.style.setProperty("--text", theme.text_color);
-      }
-      function showScreen(name) { ["splash", "language", "main"].forEach((k) => el[k].classList.toggle("active", k === name)); }
-      function showToast(msg) {
-        el.toast.textContent = msg; el.toast.style.display = "block";
-        clearTimeout(showToast.t); showToast.t = setTimeout(() => (el.toast.style.display = "none"), 2600);
+      const tg = () => window.Telegram?.WebApp;
+      const cls = (name) => ["splash","lang","main"].forEach((k)=>el[k].classList.toggle("active", k===name));
+      const toast = (m)=>{el.toast.textContent=m;el.toast.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.toast.style.display='none',2600)};
+      const api = (path, method='GET', body=null) => fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):null}).then(r=>r.json());
+
+      function tileClass(type){ return type==='boost'?'boost':type==='token'?'token':type==='nothing'?'nothing':'usdt'; }
+      function tileText(item){ if(item.t==='boost')return '🚀 +3% 24ч'; if(item.t==='token')return '🪙 '+item.l; if(item.t==='nothing')return '😶 0'; return '💵 '+item.l; }
+      function buildTrack(){
+        const list=[...catalog,...catalog,...catalog];
+        el.track.innerHTML=list.map(i=>`<div class="tile ${tileClass(i.t)}">${tileText(i)}</div>`).join('');
       }
 
-      function renderNav() {
-        const d = I18N[state.lang];
-        el.bottomNav.innerHTML = TABS.map((tab) => `<button class="nav-btn ${state.activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}"><span>${tab.icon}</span><span>${d.tabs[tab.id]}</span></button>`).join("");
+      function renderNav(){
+        const d=i18n[state.lang];
+        el.nav.innerHTML=tabIds.map(t=>`<button class="nbtn ${state.tab===t?'active':''}" data-tab="${t}"><span>${d.tabs[t].split(' ')[0]}</span><span>${d.tabs[t].replace(/^\S+\s?/,'')}</span></button>`).join('');
       }
 
-      function buildRouletteCard() {
-        const d = I18N[state.lang];
-        const tiles = [...TILES, ...TILES, ...TILES].map((v) => `<div class="tile ${v.includes("BOOST") ? "boost" : "usdt"}">${v.includes("BOOST") ? "🚀 +3%" : "💵 " + v.replace("USDT ", "")}</div>`).join("");
-        return `<section class="roulette-card">
-          <div class="roulette-head"><h3 class="roulette-title">${d.rouletteTitle}</h3><span class="cost">${d.rouletteCost}</span></div>
-          <div class="reel-wrap"><div class="reel-track" id="reelTrack">${tiles}</div></div>
-          <div class="roulette-info" id="rouletteInfo">${d.rouletteHint}</div>
-          <button class="start-btn" id="startBtn">${d.start}</button>
-        </section>`;
-      }
-
-      function renderMain() {
-        const d = I18N[state.lang];
-        el.langTitle.textContent = d.chooseLanguage;
-        renderNav();
-        el.balanceLabel.textContent = `💰 ${state.balance}`;
-
-        if (state.activeTab === "farm") {
-          el.farmArea.innerHTML = buildRouletteCard();
-          el.tabCard.innerHTML = `<div class="tab-title">${d.betaTab}</div><div>${d.rouletteHint}</div>`;
-          bindRoulette();
+      function renderTab(){
+        const d=i18n[state.lang];
+        if(state.tab==='prizes'){
+          const wins=state.profile?.wins||[];
+          const html = wins.length ? wins.map(w=>{
+            const canActivate = w.prize_type==='boost' && w.status==='pending_activation';
+            return `<div class="item ${canActivate?'pending':''}"><div class="row"><b>🎁 ${w.prize_label}</b><span class="mini">${w.status}</span></div>${canActivate?`<button class="tiny-btn mt8" data-activate="${w.id}">${d.activate}</button>`:''}</div>`;
+          }).join('') : `<div class="mini">${d.noWins}</div>`;
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.prizes}</div><div class="list mt8">${html}</div>`;
+        } else if(state.tab==='can') {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.can}</div><div class="chips mt8">${catalog.map(c=>`<span class="chip">${tileText(c)}</span>`).join('')}</div>`;
+        } else if(state.tab==='info') {
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.info}</div><div class="sub mt8">${d.info}</div>`;
         } else {
-          el.farmArea.innerHTML = "";
-          el.tabCard.innerHTML = `<div class="tab-title">${d.tabs[state.activeTab]}</div><div>${d.tabText[state.activeTab]}</div>`;
+          el.tabContent.innerHTML=`<div class="title" style="font-size:18px">${d.tabs.spin}</div><div class="sub mt8">${d.hint}</div>`;
         }
       }
 
-      function animateSpin() {
-        const reel = document.getElementById("reelTrack");
-        const chosen = Math.floor(Math.random() * TILES.length) + TILES.length;
-        reel.style.transform = `translateX(-${chosen * 88 - 176}px)`;
-        return TILES[chosen % TILES.length];
+      function renderBase(){
+        const d=i18n[state.lang];
+        el.title.textContent=d.title;
+        el.winLabel.textContent=d.won;
+        el.spinBtn.textContent=d.start;
+        el.balance.textContent=`💰 ${(state.profile?.balance ?? 0).toFixed(2)}$`;
+        el.chance.textContent=`${state.profile?.win_chance ?? '--'}%`;
+        renderNav(); renderTab();
       }
 
-      function bindRoulette() {
-        const d = I18N[state.lang];
-        const btn = document.getElementById("startBtn");
-        const info = document.getElementById("rouletteInfo");
-        btn?.addEventListener("click", () => {
-          if (state.spinning) return;
-          state.spinning = true;
-          btn.disabled = true;
-          info.textContent = d.spinning;
-          animateSpin();
-
-          const app = tg();
-          if (app) {
-            app.sendData(JSON.stringify({ action: "roulette_spin", ts: Date.now() }));
-            showToast(d.sentToBot);
-          } else {
-            showToast(d.demoOnly);
-          }
-
-          setTimeout(() => {
-            state.spinning = false;
-            btn.disabled = false;
-            info.textContent = d.rouletteHint;
-          }, 3400);
-        });
+      async function refreshProfile(){
+        if(!state.userId) return;
+        const data=await api(`/api/profile?user_id=${state.userId}`);
+        if(data.ok){ state.profile=data; renderBase(); }
       }
 
-      function bindEvents() {
-        document.querySelectorAll("[data-lang]").forEach((button) => button.addEventListener("click", () => {
-          state.lang = button.dataset.lang;
-          localStorage.setItem("miniapp_lang", state.lang);
-          state.activeTab = "farm";
-          renderMain();
-          showScreen("main");
-        }));
-        el.bottomNav.addEventListener("click", (e) => {
-          const btn = e.target.closest("[data-tab]");
-          if (!btn) return;
-          state.activeTab = btn.dataset.tab;
-          renderMain();
-        });
+      function animateTo(label){
+        const one=96;
+        const centerOffset=192;
+        const base=[...catalog,...catalog,...catalog];
+        const idx = base.findIndex((x,i)=>i>=catalog.length && x.l===label);
+        const target = idx>0?idx:catalog.length+Math.floor(Math.random()*catalog.length);
+        el.track.style.transform=`translateX(-${target*one-centerOffset}px)`;
       }
 
-      function initIdentity() {
-        const app = tg();
-        const user = app?.initDataUnsafe?.user;
-        if (user?.id) state.balance = "user#" + user.id;
+      async function doSpin(){
+        const d=i18n[state.lang];
+        if(state.spinning) return;
+        state.spinning=true; el.spinBtn.disabled=true; el.result.textContent=d.spinning;
+        const fake = catalog[Math.floor(Math.random()*catalog.length)];
+        animateTo(fake.l);
+        const res = await api('/api/spin','POST',{user_id:state.userId});
+        if(!res.ok){ toast(d.insuff); state.spinning=false; el.spinBtn.disabled=false; el.result.textContent=d.hint; return; }
+        animateTo(res.prize_label || fake.l);
+        setTimeout(async ()=>{
+          await refreshProfile();
+          if(res.reward==='nothing') el.result.textContent=d.nothing;
+          else el.result.textContent=`🏆 ${res.prize_label}`;
+          state.spinning=false; el.spinBtn.disabled=false;
+        }, 4200);
       }
 
-      function start() {
-        initTelegram();
-        initIdentity();
-        bindEvents();
-        setTimeout(() => {
-          if (state.lang && I18N[state.lang]) { renderMain(); showScreen("main"); }
-          else showScreen("language");
-        }, 1400);
+      async function activateBoost(winId){
+        const d=i18n[state.lang];
+        const res=await api('/api/activate_boost','POST',{user_id:state.userId, win_id:winId});
+        if(res.status==='ok') toast(d.activated); else if(res.status==='already') toast(d.already); else toast(d.needPool);
+        await refreshProfile();
+      }
+
+      function bind(){
+        document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{state.lang=b.dataset.lang;localStorage.setItem('miniapp_lang',state.lang);renderBase();cls('main')}));
+        el.nav.addEventListener('click',(e)=>{const b=e.target.closest('[data-tab]');if(!b)return;state.tab=b.dataset.tab;renderBase();});
+        el.spinBtn.addEventListener('click',doSpin);
+        el.tabContent.addEventListener('click',(e)=>{const b=e.target.closest('[data-activate]');if(!b)return;activateBoost(Number(b.dataset.activate));});
+      }
+
+      function initUser(){
+        const app=tg();
+        app?.ready(); app?.expand();
+        state.userId = Number(app?.initDataUnsafe?.user?.id || localStorage.getItem('demo_uid') || 100001);
+        if(!localStorage.getItem('demo_uid')) localStorage.setItem('demo_uid', String(state.userId));
+      }
+
+      async function start(){
+        buildTrack(); initUser(); bind();
+        setTimeout(async()=>{
+          if(state.lang){ cls('main'); await refreshProfile(); renderBase(); }
+          else cls('lang');
+        }, 1100);
       }
       start();
     </script>
   </body>
 </html>
+
+</html>
+
 
